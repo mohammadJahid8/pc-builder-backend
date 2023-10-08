@@ -22,7 +22,7 @@ async function run() {
     await client.connect();
 
     const productsCollection = client.db("pcBuilder").collection("products");
-    // const cpuCollection = client.db("pcBuilder").collection("cpu");
+    const categoryCollection = client.db("pcBuilder").collection("category");
 
     console.log("connected to db");
 
@@ -42,6 +42,16 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await productsCollection.findOne(query);
 
+      res.send(result);
+    });
+
+    app.post("/products", async (req, res) => {
+      const result = await productsCollection.insertOne(req.body);
+      res.send(result);
+    });
+
+    app.get("/category", async (req, res) => {
+      const result = await categoryCollection.find().toArray();
       res.send(result);
     });
   } finally {
