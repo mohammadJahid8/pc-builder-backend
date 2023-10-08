@@ -26,6 +26,17 @@ async function run() {
 
     console.log("connected to db");
 
+    app.get("/products", async (req, res) => {
+      let filter = {};
+      if (req.query && req.query.featured === "true") {
+        filter = { featured: true };
+      } else {
+        filter = req.query;
+      }
+      const result = await productsCollection.find(filter).toArray();
+      res.send(result);
+    });
+
     app.get("/products/:id", async (req, res) => {
       const { id } = req.params;
       const query = { _id: new ObjectId(id) };
