@@ -29,9 +29,8 @@ async function run() {
     app.get("/products/:id", async (req, res) => {
       const { id } = req.params;
       const query = { _id: new ObjectId(id) };
-      console.log(query);
       const result = await productsCollection.findOne(query);
-      console.log(result);
+
       res.send(result);
     });
   } finally {
