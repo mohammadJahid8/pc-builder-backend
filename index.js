@@ -22,9 +22,18 @@ async function run() {
     await client.connect();
 
     const productsCollection = client.db("pcBuilder").collection("products");
-    const cpuCollection = client.db("pcBuilder").collection("cpu");
+    // const cpuCollection = client.db("pcBuilder").collection("cpu");
 
     console.log("connected to db");
+
+    app.get("/products/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      console.log(query);
+      const result = await productsCollection.findOne(query);
+      console.log(result);
+      res.send(result);
+    });
   } finally {
   }
 }
