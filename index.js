@@ -19,40 +19,50 @@ const client = new MongoClient(
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const productsCollection = client.db("pcBuilder").collection("products");
-    const categoryCollection = client.db("pcBuilder").collection("category");
 
     console.log("connected to db");
 
     app.get("/products", async (req, res) => {
-      let filter = {};
-      if (req.query && req.query.featured === "true") {
-        filter = { featured: true };
-      } else {
-        filter = req.query;
+      try {
+        const { featured, ...otherFilters } = req.query;
+        const filter = featured === "true" ? { featured: true } : otherFilters;
+
+        const result = await productsCollection.find(filter).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
       }
-      const result = await productsCollection.find(filter).toArray();
-      res.send(result);
     });
 
     app.get("/products/:id", async (req, res) => {
-      const { id } = req.params;
-      const query = { _id: new ObjectId(id) };
-      const result = await productsCollection.findOne(query);
+      try {
+        const { id } = req.params;
+        const query = { _id: new ObjectId(id) };
+        const result = await productsCollection.findOne(query);
 
-      res.send(result);
+        if (result) {
+          res.send(result);
+        } else {
+          res.status(404).send("Product not found");
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.post("/products", async (req, res) => {
-      const result = await productsCollection.insertOne(req.body);
-      res.send(result);
-    });
-
-    app.get("/category", async (req, res) => {
-      const result = await categoryCollection.find().toArray();
-      res.send(result);
+      try {
+        const result = await productsCollection.insertOne(req.body);
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
   } finally {
   }
